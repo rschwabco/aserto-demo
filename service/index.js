@@ -37,10 +37,10 @@ app.use(bodyParser.urlencoded({
     extended: true
 }));
 
-
+const checkAuthz = jwtAuthz(authzOptions)
 
 // Create timesheets API endpoint
-app.get('/api/protected', checkJwt, function (req, res) {
+app.get('/api/protected', checkJwt, checkAuthz, function (req, res) {
     var timesheet = req.body;
 
     // Save the timesheet to the database...
