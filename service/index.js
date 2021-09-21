@@ -4,12 +4,14 @@ const jwt = require('express-jwt');
 const jwksRsa = require('jwks-rsa');
 const cors = require('cors');
 const bodyParser = require('body-parser');
-const { displayStateMap, jwtAuthz, is } = require('express-jwt-aserto');
+const { jwtAuthz } = require('express-jwt-aserto');
 
 const authzOptions = {
     authorizerServiceUrl: "https://authorizer.prod.aserto.com",
     policyId: "c22c1e35-1b0f-11ec-808e-015eb15c5e57",
     policyRoot: "asertodemo",
+    authorizerApiKey: "437d2402b527997a3f7c0fe9f0d810c5bee74d44e6d68b0712528c9d73c297f8",
+    tenantId: "82df8ce7-1b0f-11ec-a877-005eb15c5e57"
 };
 
 
@@ -31,20 +33,12 @@ const checkJwt = jwt({
     algorithms: ['RS256']
 });
 
-// Enable the use of request body parsing middleware
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({
-    extended: true
-}));
-
+//Aserto authorizer
 const checkAuthz = jwtAuthz(authzOptions)
+
 
 // Create timesheets API endpoint
 app.get('/api/protected', checkJwt, checkAuthz, function (req, res) {
-    var timesheet = req.body;
-
-    // Save the timesheet to the database...
-
     //send the response
     res.status(201).json({ foo: "bar" });
 });
