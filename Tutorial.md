@@ -57,26 +57,33 @@ Next, we'll create an API so that our Express.js application can communicate wit
 ![PICTURE](/images/auth0-menu-apis.png)
 
 Click the "Create API Button":
+
 ![PICTURE](/images/auth0-apis-create.png)
 
 Complete the form as shown below:
+
 ![PICTURE](/images/auth0-apis-create-details.png)
 
 You can inspect the settings tab, we'll use some of these details later.
+
 ![PICTURE](/images/auth0-apis-settings.png)
 
 The last thing we have to set up in Auth0 are test users. We'll set up two users: one that will have access to our protected asset, and another that should eventually not be able to acess it.
 
 Navigate to the users management section in the lefthand side menu:
+
 ![PICTURE](/images/auth0-menu-users.png)
 
 Now create the two users. Click on the "Create User" button:
+
 ![PICTURE](/images/auth0-user-create-button.png)
 
 Complete the form as shown below:
+
 ![PICTURE](/images/auth0-user-create-details.png)
 
 Then repeat the process for the second user:
+
 ![PICTURE](/images/auth0-user-no-access-create-details.png)
 
 ## React Application setup
