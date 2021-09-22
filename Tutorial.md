@@ -201,12 +201,12 @@ const checkJwt = jwt({
         cache: true,
         rateLimit: true,
         jwksRequestsPerMinute: 5,
-        jwksUri: `https://dev-apjz4h14.us.auth0.com/.well-known/jwks.json`
+        jwksUri: process.env.AUTH0_JWKS_URI
     }),
 
     // Validate the audience and the issuer
-    audience: 'https://dev-apjz4h14.us.auth0.com/api/v2/', //replace with your API's audience, available at Dashboard > APIs
-    issuer: 'https://dev-apjz4h14.us.auth0.com/',
+    audience: process.env.AUTH0_AUDIENCE, //replace with your API's audience, available at Dashboard > APIs
+    issuer: process.env.AUTH0_ISSUER,
     algorithms: ['RS256']
 });
 
