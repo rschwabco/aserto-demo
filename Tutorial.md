@@ -2,7 +2,7 @@
 
 In almost every production level application, there comes the need to allow for a fine grained control over what users can see and do. For the most part, authorization is left as a secondary concern - often bolted on to the application as an afterthought. Then it proves to be difficult and time consuming to hand craft the authorization solution. That’s where Aserto can help.
 
-Aserto is a could-native authorization platform that allows developers to avoid having to build their own access control solution and instead frees them up to focus on their core user experience. In this tutorial you will learn how to integrate the Aserto SDK in the context of an Express.js application.
+Aserto is a could-native authorization platform that allows developers to avoid having to build their own access control solution and instead frees them up to focus on their core user experience. In this tutorial you will learn how to integrate the Aserto SDK in the context of an Express.js API, together with a React application.
 
 Before we get started, let’s discuss Aserto’s two major components: the Authorizer and the Control Plane.
 
@@ -23,7 +23,7 @@ When you’ve completed this tutorial you would have learned how to:
 ## Application Overview
 
 The application we will build in this tutorial will be a simple one:
-The user will be able to log in and out, and once they're logged in the application will attempt to access a protected asset served by an Express.js API. The Express.js API will call the Aserto hosted authorizer. The authorizer apply a policy which will allow only one user to access this asset based on their email.
+The user will be able to log in and out, and once they're logged in the application will attempt to access a protected asset served by an Express.js API. The Express.js API will call the Aserto hosted authorizer. The authorizer will apply a policy which will allow only one user to access this asset based on their email. We're going to two create two test users - and expect only one of them to have access to a mock sensitive asset we'll simulate.
 
 ## Prerequisites
 
@@ -50,7 +50,7 @@ Next, we’ll set up a Single Page Application.
 
 ![Create Auth0 SPA](/images/auth0-spa-create.png)
 
-Once created, we'll configure the application's callback URLs, logout URLs and allowed web origins to work with our local applications which will be running on `http://localhost:3000`.
+Once created, we'll configure the application's callback URLs, logout URLs and allowed web origins to work with our local applications which will be running on `http://localhost:3000`. Complete the form as shown below:
 
 ![PICTURE](/images/auth0-spa-settings.png)
 
@@ -90,7 +90,7 @@ Then repeat the process for the second user:
 
 ## React Application setup
 
-We’re going to build a very bare bones application for this tutorial. We’ll start by creating an application using the `create-react-app` generator. We are following the Auth0 instructions for creating a React app that can leverage Auth0 for authentication found [here]().
+We’re going to build a very bare bones application for this tutorial. We’ll start by creating an application using the `create-react-app` generator. We are following the Auth0 instructions for creating a React app that can leverage Auth0 for authentication found [here](https://auth0.com/docs/quickstart/spa/react/01-login).
 
 Let's kick things off and use `npx create-react-app` to initialize our React application.
 
@@ -117,10 +117,10 @@ Wrap the top level React Application component with the `Auth0Provider`, and pas
 ```
 ReactDOM.render(
   <Auth0Provider
-    domain="***.us.auth0.com"
-    clientId="***********************"
+    domain={process.env.REACT_APP_AUTH0_DOMAIN}
+    clientId={process.env.REACT_APP_CLIENTID}
     redirectUri={window.location.origin}
-    audience="https://***.us.auth0.com/api/v2/"
+    audience={process.env.REACT_APP_AUDIENCE}
     scope="read:current_user update:current_user_metadata"
   >
     <App />
@@ -129,6 +129,16 @@ ReactDOM.render(
 );
 
 ```
+
+To make sure the authentication credentials aren't checked in, create a `.env` file in the root of the react project, and copy over the credentials from the Auth0 console.
+
+```
+REACT_APP_AUTH0_DOMAIN={YOUR_AUTH0_SUBDOMAIN}.us.auth0.com
+REACT_APP_CLIENTID={YOUR_CLIENT_ID}
+REACT_APP_AUDIENCE={YOUR_REACT_APP_AUDIENCE}
+```
+
+Make sure the `.env` file is add to the `.gitignore` file.
 
 Now let's move on to building some components that will make use of the `Auth0Provider`. We'll start by creating a `components` folder under `src`. Then we'll create a file called `LoginButton.js`.
 
@@ -209,22 +219,28 @@ export default App;
 
 ```
 
-**Let's test** our application by logging in. If everything goes right, the profile picture and email of the signed in user should be displayed.
+**Let's test** our application by logging in. To start your application run:
+
+```
+npm start
+```
+
+Then hit the "Log In" button. If everything works as expected, the profile picture and email of the signed in user should be displayed.
+
+We now turn to creating the Express.js service which will host our "protected asset" and will communicate with the Aserto hosted authorizer to determine whether or not a logged in user has the permissions to access the said asset.
 
 ## Service Setup
 
-We now turn to creating the Express.js service which will communicate with the Aserto hosted authorizer.
-
-We'll start by installing and importing all of the required dependencies. Create a new folder and run:
+We'll start by installing and importing all of the required dependencies. Create a new folder called `service` (it can be located under the React application folder or in any other location you might choose) and run:
 
 ```
 npm init -y
 npm install express express-jwt jwks-rsa cors express-jwt-aserto
 ```
 
-Create a file called `.env` - this is where we will store sensitive credentials. Add this file to your `.gitignore` so that it is not checked in.
+Create a file called `.env` - this is where we will store sensitive credentials. Create a `.gitignore` file and add both `node_modules` and `.env` to it so that they are not checked in.
 
-To the `.env` file add the following entries and copy the values from the Auth0 console.
+To the `.env` file add the following entries and copy the values from the Auth0 console (under the APIs section).
 
 ```
 AUTH0_JWKS_URI=https://{YOUR_AUTH0_DOMAIN_HERE}.us.auth0.com/.well-known/jwks.json
@@ -355,7 +371,7 @@ We can further test this by intentionally sending a malformed header and making 
 
 In this case we'd expect the sensitive information to not be shown.
 
-Next we'll create an Aserto policy and allow access to the sensitive information to a single user.
+Right now, both test users we created will be able to access the protected asset. Next we'll create an Aserto policy and allow access only to a single user.
 
 ---
 
@@ -367,7 +383,7 @@ We start by creating a new policy in the Aserto console. Once you're logged in, 
 
 ![PICTURE](/images/aserto-add-policy-button.png)
 
-You'll see the following dialog, prompting you to select a code provider.
+You'll see the following dialog, prompting you to select a code provider. As mentioned above, Aserto uses source code control to maintain policies, so we first have to provide a source code provider where the policy will be stored and changes to it would be tracked.
 
 ![PICTURE](/images/aserto-add-policy-details-1.png)
 
@@ -375,7 +391,7 @@ From the drop down select "Add new source code connection"
 
 ![PICTURE](/images/aserto-add-policy-details-add-source.png)
 
-Another dialog will appear.
+Another dialog will appear, asking us to choose a specific provider:
 
 ![PICTURE](/images/aserto-add-connection.png)
 
@@ -403,7 +419,25 @@ We'll start by updating the manifest file, which currently will only points to t
 }
 ```
 
-Next, we'll change the package name to match the path of our Express API. We're also going to state that the only "allowed" user is one with the email "aserto@demo.com". We'll make no further changes to the policy.
+Next, we'll change the package name to match the path of our Express API. The structure of the package name is:
+
+```
+[policy-root].[VERB].[path]
+```
+
+Where the path is seperated by dots instead of slashes. And so in our case, the express path
+
+```
+app.get('/api/protected'...
+```
+
+becomes
+
+```
+package asertodemo.GET.api.protected
+```
+
+We're also going to state that the only "allowed" user is one with the email "aserto@demo.com". The user seen here will be the same user we recieve from Auth0 (based on their JWT). Aserto attaches this user object to the "input" object. Below is the finished policy:
 
 ```
 package asertodemo.GET.api.protected
@@ -432,21 +466,26 @@ visible {
 To make sure our changes take effect, we need to commit our changes and tag a release before we push them back to the repo.
 
 ```
-
+git add .
+git commit -m "Policy update"
+git tag -a v0.0.1 -m "Policy update"
+git push origin master
 ```
 
 ## Update the Express service to use the Aserto middleware
 
-Next we need to configure and apply the Aserto middleware. In order to avoid saving any secret credentials in our source code, we'll add the following credentials to our `.env` file.
+We now need to configure and apply the Aserto middleware. In order to avoid saving any secret credentials in our source code, we'll add the following credentials to our `.env` file.
 
-To find these credentials, click on your policy in the Policies tab. You should see the following:
+To find these credentials, click on your policy in the Policies tab. Then choose the "Policy settings" tab. You should see the following:
+
+![](/images/aserto-policy-settings.png)
 
 Copy the values to the `.env` file:
 
 ```
-POLICY_ID=**********
+POLICY_ID{Your Policy ID}
 POLICY_ROOT=asertodemo
-AUTHORIZER_API_KEY=****************
+AUTHORIZER_API_KEY={Your Authorizer API Key}
 TENANT_ID={Your tenant ID}
 
 ```
@@ -480,6 +519,16 @@ app.get('/api/protected', checkJwt, checkAuthz, function (req, res) {
 });
 ```
 
-When we log in with the user we allowed in the policy, we will still be able to see the "Very sensitive information presented here". But since we defined that only this user has access, when we attempt to login with the second user we created, we should see the message "No access to sensitive data". Success!
+When we log in with the user we allowed in the policy, we will still be able to see the "Very sensitive information presented here".
+
+![](/images/aserto-test-access-user.png)
+
+But since we defined that only this user has access, when we attempt to login with the second user we created, we should see the message "No access to sensitive data".
+
+![](/images/aserto-test-no-access-user.png)
+
+Success!
 
 ## Summary
+
+In this tutorial, we learned how to create a React application that authenticates with Auth0, and then queries an Express.js API which is protected by Auth0 for authentication and Aserto for authorization. We learned how to create and modify a simple Aserto policy - a first step towards having fine grained control over which users can access which resources. In future tutorials we'll learn how to create more elaborate policies as well as leverging more of the capabilities of the Aserto's SDKs and APIs.
