@@ -52,11 +52,12 @@ Next, we’ll set up a Single Page Application.
 
 ![Create Auth0 SPA](/images/auth0-spa-create.png)
 
-Once created, we'll configure the application's callback URLs, logout URLs and allowed web origins to work with our local applications which will be running on `http://localhost:3000`. Complete the form as shown below:
+Once created, we'll navigate to the settings tab of the application and configure the callback URLs, logout URLs and allowed web origins to work with our local applications which will be running on `http://localhost:3000`. Complete the form as shown below:
 
 ![Auth0 SPA settings](/images/auth0-spa-settings.png)
 
-<!--
+When done, scroll to the bottom of the page and hit "Save".
+
 Next, we'll create an API so that our Express.js application can communicate with Auth0 as well.
 
 ![PICTURE](/images/auth0-menu-apis.png)
@@ -72,7 +73,6 @@ Complete the form as shown below:
 You can inspect the settings tab, we'll use some of these details later.
 
 ![PICTURE](/images/auth0-apis-settings.png)
--->
 
 The last thing we have to set up in Auth0 are test users. We'll set up two users: one that will have access to our sensitive asset, and another that should eventually not be able to acess it.
 
@@ -112,7 +112,7 @@ Let's kick things off and use `npx create-react-app` to initialize our React app
 npx create-react-app aserto-react-demo
 ```
 
-You can start the app by running:
+You can now `cd aserto-react-demo` and start the app by running:
 
 ```
 npm start
@@ -166,7 +166,7 @@ Make sure the `.env` file is add to the `.gitignore` file so that it is not chek
 
 ### Building Components
 
-Now let's move on to building some components that will make use of the `Auth0Provider`. We'll start by creating a `components` folder under `src`. Then we'll create a file called `LoginButton.js`.
+Now let's move on to building some components that will also make use of the `@auth0/auth0-react` package. We'll start by creating a `components` folder under `src`. Then we'll create a file called `LoginButton.js`.
 
 ```
 import React from "react";
@@ -181,7 +181,7 @@ const LoginButton = () => {
 export default LoginButton;
 ```
 
-Similar to the login button, we'll create a `LogoutButton.js` component.
+Similar to the login button, we'll create a `LogoutButton.js` file, in the `components` folder.
 
 ```
 import React from "react";
@@ -265,7 +265,7 @@ First, create a new folder called `service` (it can be located under the React a
 
 ```
 npm init -y
-npm install express express-jwt jwks-rsa cors express-jwt-aserto
+npm install express express-jwt jwks-rsa cors express-jwt-aserto dotenv
 ```
 
 Create a file called `.env` - this is where we will store sensitive credentials. Create a `.gitignore` file and add both `node_modules` and `.env` to it so that they are not checked in.
@@ -288,7 +288,6 @@ const jwksRsa = require('jwks-rsa');
 const cors = require('cors');
 const { jwtAuthz } = require('express-jwt-aserto');
 require('dotenv').config()
-
 ```
 
 In the next section we'll define the middleware function which will call Auth0 to verify the validy of the JWT (and also enable CORS):
@@ -331,6 +330,12 @@ app.get('/api/protected', checkJwt, function (req, res) {
 app.listen(8080);
 ```
 
+To start the server, run the following from within the `service` directory:
+
+```
+node index.js
+```
+
 ### Enhance the profile page
 
 To test this endpoint we're going to have to make sure the React app actually sends the authentication token to the server. To do that, we'll have to make some changes to the `Profile.js` file in our React app.
@@ -345,7 +350,7 @@ const Profile = () => {
 
     useEffect(() => {
         const accessProtectedInformation = async () => {
-            const domain = "dev-apjz4h14.us.auth0.com";
+            const domain = process.env.REACT_APP_AUTH0_DOMAIN;
 
             try {
                 const accessToken = await getAccessTokenSilently({
@@ -516,7 +521,7 @@ git tag -a v0.0.1 -m "Policy update"
 git push origin master
 ```
 
-### Add a connection to Auth0
+## Add a connection to Auth0
 
 In order for Aserto to be able to work with the same users found in Auth0, we need to create a connection to Auth0. To do that, navigate to the "Connections" tab in the Aserto console, and click the "Add Connection" button. Complete the form using the M2M credentials you created before for the Aserto Management application in Auth0.
 
@@ -571,6 +576,8 @@ app.get('/api/protected', checkJwt, checkAuthz, function (req, res) {
 });
 ```
 
+> Before testing the application, make sure you restart the server.
+
 When we log in with the user we allowed in the policy, we will still be able to see the "Very sensitive information presented here".
 
 ![](/images/aserto-test-access-user.png)
@@ -579,7 +586,7 @@ But since we defined that only this user has access, when we attempt to login wi
 
 ![](/images/aserto-test-no-access-user.png)
 
-Success!
+Success! The sensitive information is presented only to the user we intended.
 
 ## Summary
 

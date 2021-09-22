@@ -6,7 +6,7 @@ const Profile = () => {
     const [sensitiveInformation, setSensitiveInformation] = useState(false)
     useEffect(() => {
         const accessProtectedInformation = async () => {
-            const domain = "dev-apjz4h14.us.auth0.com";
+            const domain = process.env.REACT_APP_AUTH0_DOMAIN;
 
             try {
                 const accessToken = await getAccessTokenSilently({
@@ -14,7 +14,7 @@ const Profile = () => {
                     scope: "read:current_user",
                 });
 
-                const sensitiveInformationURL = `http://localhost:8080/api/protected`;
+                const sensitiveInformationURL = process.env.REACT_APP_PROTECTED_API;
                 const metadataResponse = await fetch(sensitiveInformationURL, {
                     headers: {
                         Authorization: `Bearer ${accessToken}`,

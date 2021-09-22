@@ -6,8 +6,6 @@ const cors = require('cors');
 const { jwtAuthz } = require('express-jwt-aserto');
 require('dotenv').config()
 
-
-
 const checkJwt = jwt({
     // Dynamically provide a signing key based on the kid in the header and the signing keys provided by the JWKS endpoint
     secret: jwksRsa.expressJwtSecret({
@@ -26,7 +24,7 @@ const checkJwt = jwt({
 // Enable CORS
 app.use(cors());
 
-//Aserto authorizer
+//Aserto authorizer configuration
 const authzOptions = {
     authorizerServiceUrl: "https://authorizer.prod.aserto.com",
     policyId: process.env.POLICY_ID,
