@@ -34,17 +34,19 @@ To get started, you’re going to need:
 
 ## Auth0 Setup
 
-![Tux, the Linux mascot]()
+![PICTURE]()
 
 We’re going to need to set up an Auth0 application and use some of the credentials provided there in our application. If you don’t have one already, open an Auth0 account.
 
 Next, we’ll set up a Single Page Application.
 
-![Tux, the Linux mascot]()
+![PICTURE]()
 
 Create an API
 
-![Tux, the Linux mascot]()
+![PICTURE]()
+
+Create a test user
 
 ## React Application setup
 
@@ -159,7 +161,6 @@ function App() {
       <LoginButton />
       <LogoutButton />
       <Profile />
-
     </div>
   );
 }
@@ -172,7 +173,13 @@ export default App;
 
 We turn now to creating the Express.js service which will communicate with the Aserto hosted authorizer.
 
-We'll start by importing all of the required dependencies:
+We'll start by installing and importing all of the required dependencies:
+
+```
+npm install express express-jwt jwks-rsa cors express-jwt-aserto
+```
+
+Create a file called `index.js` - that will be our server.
 
 ```
 const express = require('express');
@@ -180,13 +187,13 @@ const app = express();
 const jwt = require('express-jwt');
 const jwksRsa = require('jwks-rsa');
 const cors = require('cors');
-const bodyParser = require('body-parser');
 const { jwtAuthz } = require('express-jwt-aserto');
 ```
 
 Next we define the middleware function which will call Auth0 to verify the validy of the JWT.
 
 ```
+//Paste after the dependencies
 
 const checkJwt = jwt({
     // Dynamically provide a signing key based on the kid in the header and the signing keys provided by the JWKS endpoint
@@ -206,15 +213,17 @@ const checkJwt = jwt({
 // Enable CORS
 app.use(cors());
 
+// Next section of code to be pasted below
 ```
 
 Next, we'll create the protected endpoint.
 
 ```
+
 // Create timesheets API endpoint
 app.get('/api/protected', checkJwt, function (req, res) {
     //send the response
-    res.status(201).json({ foo: "bar" });
+    res.json({ secret: "Very sensitive information presented here" });
 });
 
 // Launch the API Server at localhost:8080
@@ -229,6 +238,7 @@ import { useAuth0 } from "@auth0/auth0-react";
 
 const Profile = () => {
     const { user, isAuthenticated, getAccessTokenSilently } = useAuth0();
+    const [sensitiveInformation, setSensitiveInformation] = useState(false)
 
     useEffect(() => {
         const accessProtectedInformation = async () => {
@@ -240,15 +250,15 @@ const Profile = () => {
                     scope: "read:current_user",
                 });
 
-                const userDetailsByIdUrl = `http://localhost:8080/api/protected`;
-                const metadataResponse = await fetch(userDetailsByIdUrl, {
+                const sensitiveInformationURL = `http://localhost:8080/api/protected`;
+                const metadataResponse = await fetch(sensitiveInformationURL, {
                     headers: {
                         Authorization: `Bearer ${accessToken}`,
                     },
                 });
 
                 const res = await metadataResponse.json();
-                console.log(res)
+                setSensitiveInformation(res.secret)
 
             } catch (e) {
                 console.log(e.message);
@@ -265,7 +275,7 @@ const Profile = () => {
                 <img src={user.picture} alt={user.name} />
                 <h2>{user.name}</h2>
                 <p>{user.email}</p>
-
+                <p>{sensitiveInformation || 'No access to sensitive information'}</p>
             </div>
         )
     );
@@ -274,4 +284,97 @@ const Profile = () => {
 export default Profile;
 ```
 
+In this portion of the code we use an effect to first obtain a token from Auth0. Then we preform the call to our service sending the authorization token as part of our request's headers.
+
+Let's test our application by logging in. If everything works as expected, we should see the profile picutre for the account we logged in with, as well as the label "Very sensitive information presented here". This should work for both users we created in Auth0.
+
+Next we'll create an Aserto policy and allow access to the sensitive information to a single user.
+
 ---
+
+## Create an Aserto Policy
+
+The policy we'll create for this tutorial is very simple. It is going to allow access to the protected information only to one user.
+
+We start by creating a new policy in the Aserto console.
+
+![PICTURE]()
+
+Aserto will save the new policy in the connected Github account. We will clone this repo and make some changes in it.
+
+```
+package asertodemo.GET.api.protected
+
+# default to a "closed" system,
+# only grant access when explicitly granted
+
+default allowed = false
+default visible = false
+default enabled = false
+
+allowed {
+    input.user.email == "roie.cohen@gmail.com"
+}
+
+enabled {
+    visible
+}
+
+visible {
+    input.app == "web-console"
+}
+
+```
+
+### Understanding the policy
+
+...
+
+Update manifest file
+
+```
+{
+    "roots": ["asertodemo"]
+}
+```
+
+## Update the Express service to use the Aserto middleware
+
+Next we need to configure and apply the Aserto midddleware. In order to avoid saving any secret credentials in our source code, we'll add the following credentials to our `.env` file.
+
+```
+POLICY_ID=**********
+POLICY_ROOT=asertodemo
+AUTHORIZER_API_KEY=****************
+TENANT_ID={Your tenant ID}
+
+```
+
+Continue by creating the configuration object for the Aserto middleware
+
+```
+const authzOptions = {
+    authorizerServiceUrl: "https://authorizer.prod.aserto.com",
+    policyId: process.env.POLICY_ID,
+    policyRoot: process.env.POLICY_ROOT,
+    authorizerApiKey: process.env.AUTHORIZER_API_KEY,
+    tenantId: process.env.TENANT_ID
+};
+
+```
+
+We'll define a function for the Aserto middleware:
+
+```
+//Aserto authorizer middleware function
+const checkAuthz = jwtAuthz(authzOptions)
+```
+
+Lastly, add the `checkAuthz` middleware to our protected path.
+
+```
+app.get('/api/protected', checkJwt, checkAuthz, function (req, res) {
+    //send the response
+    res.json({ secret: "Very sensitive information presented here" });
+});
+```

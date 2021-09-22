@@ -3,7 +3,7 @@ import { useAuth0 } from "@auth0/auth0-react";
 
 const Profile = () => {
     const { user, isAuthenticated, getAccessTokenSilently } = useAuth0();
-
+    const [sensitiveInformation, setSensitiveInformation] = useState(false)
     useEffect(() => {
         const accessProtectedInformation = async () => {
             const domain = "dev-apjz4h14.us.auth0.com";
@@ -14,15 +14,15 @@ const Profile = () => {
                     scope: "read:current_user",
                 });
 
-                const userDetailsByIdUrl = `http://localhost:8080/api/protected`;
-                const metadataResponse = await fetch(userDetailsByIdUrl, {
+                const sensitiveInformationURL = `http://localhost:8080/api/protected`;
+                const metadataResponse = await fetch(sensitiveInformationURL, {
                     headers: {
                         Authorization: `Bearer ${accessToken}`,
                     },
                 });
 
                 const res = await metadataResponse.json();
-                console.log(res)
+                setSensitiveInformation(res.secret)
 
             } catch (e) {
                 console.log(e.message);
@@ -39,7 +39,7 @@ const Profile = () => {
                 <img src={user.picture} alt={user.name} />
                 <h2>{user.name}</h2>
                 <p>{user.email}</p>
-
+                <p>{sensitiveInformation || 'No access to sensitive information'}</p>
             </div>
         )
     );

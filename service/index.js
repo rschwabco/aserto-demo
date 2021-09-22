@@ -3,20 +3,10 @@ const app = express();
 const jwt = require('express-jwt');
 const jwksRsa = require('jwks-rsa');
 const cors = require('cors');
-const bodyParser = require('body-parser');
 const { jwtAuthz } = require('express-jwt-aserto');
-
-const authzOptions = {
-    authorizerServiceUrl: "https://authorizer.prod.aserto.com",
-    policyId: "c22c1e35-1b0f-11ec-808e-015eb15c5e57",
-    policyRoot: "asertodemo",
-    authorizerApiKey: "437d2402b527997a3f7c0fe9f0d810c5bee74d44e6d68b0712528c9d73c297f8",
-    tenantId: "82df8ce7-1b0f-11ec-a877-005eb15c5e57"
-};
+require('dotenv').config()
 
 
-// Enable CORS
-app.use(cors());
 
 const checkJwt = jwt({
     // Dynamically provide a signing key based on the kid in the header and the signing keys provided by the JWKS endpoint
@@ -24,23 +14,34 @@ const checkJwt = jwt({
         cache: true,
         rateLimit: true,
         jwksRequestsPerMinute: 5,
-        jwksUri: `https://dev-apjz4h14.us.auth0.com/.well-known/jwks.json`
+        jwksUri: process.env.AUTH0_JWKS_URI
     }),
 
     // Validate the audience and the issuer
-    audience: 'https://dev-apjz4h14.us.auth0.com/api/v2/', //replace with your API's audience, available at Dashboard > APIs
-    issuer: 'https://dev-apjz4h14.us.auth0.com/',
+    audience: process.env.AUTH0_AUDIENCE, //replace with your API's audience, available at Dashboard > APIs
+    issuer: process.env.AUTH0_ISSUER,
     algorithms: ['RS256']
 });
 
-//Aserto authorizer
-const checkAuthz = jwtAuthz(authzOptions)
+// Enable CORS
+app.use(cors());
 
+//Aserto authorizer
+const authzOptions = {
+    authorizerServiceUrl: "https://authorizer.prod.aserto.com",
+    policyId: process.env.POLICY_ID,
+    policyRoot: process.env.POLICY_ROOT,
+    authorizerApiKey: process.env.AUTHORIZER_API_KEY,
+    tenantId: process.env.TENANT_ID
+};
+
+//Aserto authorizer middleware function
+const checkAuthz = jwtAuthz(authzOptions)
 
 // Create timesheets API endpoint
 app.get('/api/protected', checkJwt, checkAuthz, function (req, res) {
     //send the response
-    res.status(201).json({ foo: "bar" });
+    res.json({ secret: "Very sensitive information presented here" });
 });
 
 // Launch the API Server at localhost:8080
