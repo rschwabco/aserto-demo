@@ -23,7 +23,7 @@ When you’ve completed this tutorial you would have learned how to:
 ## Application Overview
 
 The application we will build in this tutorial will be a simple one:
-The user will be able to log in and out, and once they're logged in the application will attempt to access a protected asset served by an Express.js API. The Express.js API will call the Aserto hosted authorizer. The authorizer will apply a policy which will allow only one user to access this asset based on their email. We're going to two create two test users - and expect only one of them to have access to a mock sensitive asset we'll simulate.
+The user will be able to log in and out, and once they're logged in the application will attempt to access a sensitive asset served by an Express.js API. The Express.js API will call the _Aserto hosted authorizer_. The authorizer will apply a _policy_ which will allow only one user to access this asset based on their email. We're going to create two test users - and expect only one of them to have access to the mock sensitive asset we'll simulate.
 
 ## Prerequisites
 
@@ -36,7 +36,9 @@ To get started, you’re going to need:
 
 ## Auth0 Setup
 
-We’re going to need to set up an Auth0 application and use some of the credentials provided there in our application. If you don’t have one already, open an Auth0 account.
+We’re going to need to set up an Auth0 application and use some of the credentials provided there in our application as well as our Aserto tenant (If you don’t have one already, you should open an Auth0 account).
+
+### Application Settings
 
 Navigate to the Applications tab from the left side menu:
 
@@ -52,8 +54,9 @@ Next, we’ll set up a Single Page Application.
 
 Once created, we'll configure the application's callback URLs, logout URLs and allowed web origins to work with our local applications which will be running on `http://localhost:3000`. Complete the form as shown below:
 
-![PICTURE](/images/auth0-spa-settings.png)
+![Auth0 SPA settings](/images/auth0-spa-settings.png)
 
+<!--
 Next, we'll create an API so that our Express.js application can communicate with Auth0 as well.
 
 ![PICTURE](/images/auth0-menu-apis.png)
@@ -69,50 +72,71 @@ Complete the form as shown below:
 You can inspect the settings tab, we'll use some of these details later.
 
 ![PICTURE](/images/auth0-apis-settings.png)
+-->
 
-The last thing we have to set up in Auth0 are test users. We'll set up two users: one that will have access to our protected asset, and another that should eventually not be able to acess it.
+The last thing we have to set up in Auth0 are test users. We'll set up two users: one that will have access to our sensitive asset, and another that should eventually not be able to acess it.
 
 Navigate to the users management section in the lefthand side menu:
 
-![PICTURE](/images/auth0-menu-users.png)
+![Auth0 Menu user](/images/auth0-menu-users.png)
 
-Now create the two users. Click on the "Create User" button:
+Now we'll create the two users mentioned above. Click on the "Create User" button:
 
-![PICTURE](/images/auth0-user-create-button.png)
+![Auth0 user create button](/images/auth0-user-create-button.png)
 
 Complete the form as shown below:
 
-![PICTURE](/images/auth0-user-create-details.png)
+![Auth0 user create details](/images/auth0-user-create-details.png)
 
 Then repeat the process for the second user:
 
-![PICTURE](/images/auth0-user-no-access-create-details.png)
+![Auth0 user no access create details](/images/auth0-user-no-access-create-details.png)
+
+The last thing we have to set up in Auth0 is a Machine to Machine application which will allow Aserto to access Auth0's API. Create a new application and then choose "Machine to Machine Applications":
+
+![](/images/auth0-m2m-aserto-management.png)
+
+From the drop down, select "Auth0 Management API", then select the permissions as indicated below.
+
+![](/images/auth0-m2m-aserto-management-permissions.png)
+
+**That's it!** Auth0 is ready and configured, and we're ready to move on and start building our application.
 
 ## React Application setup
 
 We’re going to build a very bare bones application for this tutorial. We’ll start by creating an application using the `create-react-app` generator. We are following the Auth0 instructions for creating a React app that can leverage Auth0 for authentication found [here](https://auth0.com/docs/quickstart/spa/react/01-login).
 
-Let's kick things off and use `npx create-react-app` to initialize our React application.
+Let's kick things off and use `npx create-react-app` to initialize our React application. In your terminal, execute the following command:
 
 ```
 npx create-react-app aserto-react-demo
 ```
 
+You can start the app by running:
+
+```
+npm start
+```
+
+The beloved React logo should appear, indiciating that we the app is ready to go.
+
+### Adding Auth0 dependencies
+
 Now that we have a running React application, we'll continue by installing and then importing the required depedency `@auth0/auth0-react`.
 
-In your terminal, execute
+In your terminal, execute the following command:
 
 ```
 npm install @auth0/auth0-react
 ```
 
-Then in `index.js`
+Then, open the file `index.js` and add the dependency:
 
 ```
 import { Auth0Provider } from "@auth0/auth0-react";
 ```
 
-Wrap the top level React Application component with the `Auth0Provider`, and pass it the required properties found in the Auth0 settings page for the single page application you created.
+Next, we'll wrap the top level React Application component with the `Auth0Provider`, and pass it the required properties found in the Auth0 settings page for the single page application you created.
 
 ```
 ReactDOM.render(
@@ -130,15 +154,17 @@ ReactDOM.render(
 
 ```
 
-To make sure the authentication credentials aren't checked in, create a `.env` file in the root of the react project, and copy over the credentials from the Auth0 console.
+To make sure the authentication credentials aren't part of your source code, create a `.env` file in the root of the react project, and copy over the credentials from the Auth0 console (these are the SPA credentials for the Aserto Demo app mentioned above).
 
 ```
 REACT_APP_AUTH0_DOMAIN={YOUR_AUTH0_SUBDOMAIN}.us.auth0.com
 REACT_APP_CLIENTID={YOUR_CLIENT_ID}
-REACT_APP_AUDIENCE={YOUR_REACT_APP_AUDIENCE}
+REACT_APP_AUDIENCE={YOUR_APP_AUDIENCE}
 ```
 
-Make sure the `.env` file is add to the `.gitignore` file.
+Make sure the `.env` file is add to the `.gitignore` file so that it is not cheked in.
+
+### Building Components
 
 Now let's move on to building some components that will make use of the `Auth0Provider`. We'll start by creating a `components` folder under `src`. Then we'll create a file called `LoginButton.js`.
 
@@ -219,7 +245,9 @@ export default App;
 
 ```
 
-**Let's test** our application by logging in. To start your application run:
+### Test the application
+
+Let's test our application by logging in. If it's not already running, start your application by executing:
 
 ```
 npm start
@@ -227,11 +255,13 @@ npm start
 
 Then hit the "Log In" button. If everything works as expected, the profile picture and email of the signed in user should be displayed.
 
-We now turn to creating the Express.js service which will host our "protected asset" and will communicate with the Aserto hosted authorizer to determine whether or not a logged in user has the permissions to access the said asset.
+![](/images/aserto-test-initial.png).
+
+Great! Our application authenticates with Auth0, and so we have our user's identity in hand. We now turn to creating the Express.js service which will host our sensitive asset and will communicate with the Aserto hosted authorizer to determine whether or not a logged in user has the permissions to access the said asset based on the user's identity.
 
 ## Service Setup
 
-We'll start by installing and importing all of the required dependencies. Create a new folder called `service` (it can be located under the React application folder or in any other location you might choose) and run:
+First, create a new folder called `service` (it can be located under the React application folder or in any other location you might choose) and run:
 
 ```
 npm init -y
@@ -261,7 +291,7 @@ require('dotenv').config()
 
 ```
 
-In the next section we'll define the middleware function which will call Auth0 to verify the validy of the JWT (and also enable CORS)
+In the next section we'll define the middleware function which will call Auth0 to verify the validy of the JWT (and also enable CORS):
 
 ```
 //Paste after the dependencies
@@ -276,7 +306,7 @@ const checkJwt = jwt({
     }),
 
     // Validate the audience and the issuer
-    audience: process.env.AUTH0_AUDIENCE, //replace with your API's audience, available at Dashboard > APIs
+    audience: process.env.AUTH0_AUDIENCE,
     issuer: process.env.AUTH0_ISSUER,
     algorithms: ['RS256']
 });
@@ -301,7 +331,9 @@ app.get('/api/protected', checkJwt, function (req, res) {
 app.listen(8080);
 ```
 
-To test this endpoint we're going to have to make sure the React app actually sends the authentication token to the server. To do that, we'll have to make some changes to the `Profile.js` file.
+### Enhance the profile page
+
+To test this endpoint we're going to have to make sure the React app actually sends the authentication token to the server. To do that, we'll have to make some changes to the `Profile.js` file in our React app.
 
 ```
 import React, { useEffect, useState } from "react";
@@ -357,7 +389,9 @@ export default Profile;
 
 In this portion of the code we use a React effect to first obtain a token from Auth0. Then we preform the call to our service sending the authorization token as part of our request's headers.
 
-**Let's test** our application by logging in again. If everything works as expected, we should see the profile picture for the account we logged in with, as well as the label "Very sensitive information presented here". This should work for both users we created in Auth0.
+### Test the application
+
+**Let's test** our application by logging in again. If everything works as expected, we should see the profile picture for the account we logged in with, as well as the label "Very sensitive information presented here". At the moment, this should work for both users we created in Auth0.
 
 We can further test this by intentionally sending a malformed header and making sure the sensitive information isn't shown. One way to do this is to append so rouge characters to the access token like so:
 
@@ -371,13 +405,17 @@ We can further test this by intentionally sending a malformed header and making 
 
 In this case we'd expect the sensitive information to not be shown.
 
-Right now, both test users we created will be able to access the protected asset. Next we'll create an Aserto policy and allow access only to a single user.
+We'll remove the rouge characters and test our second user (aserto.no-access@demo.com).
+
+![](/images/aserto-test-user-no-access-has-access.png)
+
+Whoops! That's not what we want. But since we didn't add any way to authorize particular users - this "no-access" user still has access to our very sensitive information. Let's fix that by creating an Aserto policy to allow access only to our intended user.
 
 ---
 
 ## Create an Aserto Policy
 
-The policy we'll create for this tutorial is very simple. It is going to allow access to the protected information only to one user, based on their email.
+The policy we'll create for this tutorial is very simple. It is going to allow access to the sensitive information only to one user, based on their email.
 
 We start by creating a new policy in the Aserto console. Once you're logged in, on the Policies tab click the "Add Policy" button.
 
@@ -411,7 +449,16 @@ After selecting a name for your policy, click "Add policy" to complete the proce
 
 Next, we'll find the policy repo in our Github account, clone it and make some changes.
 
-We'll start by updating the manifest file, which currently will only points to the root of our policy.
+We'll start by updating the `.manifest` file under `src`, which currently will only points to the root of our policy.
+We'll change it from
+
+```
+{
+    "roots": ["policies"]
+}
+```
+
+to
 
 ```
 {
@@ -419,7 +466,8 @@ We'll start by updating the manifest file, which currently will only points to t
 }
 ```
 
-Next, we'll change the package name to match the path of our Express API. The structure of the package name is:
+We'll rename the file `hello.rego` to `asertodemo.GET.api.protected`.
+We'll open the file and change the package name to match the path of our Express API. The basic structure of the package name is:
 
 ```
 [policy-root].[VERB].[path]
@@ -437,7 +485,7 @@ becomes
 package asertodemo.GET.api.protected
 ```
 
-We're also going to state that the only "allowed" user is one with the email "aserto@demo.com". The user seen here will be the same user we recieve from Auth0 (based on their JWT). Aserto attaches this user object to the "input" object. Below is the finished policy:
+We're also going to define the policy such that the only "allowed" user is one with the email "aserto@demo.com". The user seen here will be the same user we recieve from Auth0 (based on their JWT). Aserto attaches this user object to the "input" object. Below is the finished policy:
 
 ```
 package asertodemo.GET.api.protected
@@ -457,10 +505,6 @@ enabled {
     visible
 }
 
-visible {
-    input.app == "web-console"
-}
-
 ```
 
 To make sure our changes take effect, we need to commit our changes and tag a release before we push them back to the repo.
@@ -471,6 +515,14 @@ git commit -m "Policy update"
 git tag -a v0.0.1 -m "Policy update"
 git push origin master
 ```
+
+### Add a connection to Auth0
+
+In order for Aserto to be able to work with the same users found in Auth0, we need to create a connection to Auth0. To do that, navigate to the "Connections" tab in the Aserto console, and click the "Add Connection" button. Complete the form using the M2M credentials you created before for the Aserto Management application in Auth0.
+
+![](/images/aserto-connections-auth0-details.png)
+
+Click "Add connection" to complete the process.
 
 ## Update the Express service to use the Aserto middleware
 
@@ -490,7 +542,7 @@ TENANT_ID={Your tenant ID}
 
 ```
 
-Continue by creating the configuration object for the Aserto middleware
+Continue by creating the configuration object for the Aserto middleware:
 
 ```
 const authzOptions = {
@@ -503,7 +555,7 @@ const authzOptions = {
 
 ```
 
-We'll define a function for the Aserto middleware:
+We'll define a function for the Aserto middleware, and pass it the configuration object.
 
 ```
 //Aserto authorizer middleware function
