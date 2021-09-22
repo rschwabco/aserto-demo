@@ -5,7 +5,7 @@ const Profile = () => {
     const { user, isAuthenticated, getAccessTokenSilently } = useAuth0();
     const [sensitiveInformation, setSensitiveInformation] = useState(false)
     useEffect(() => {
-        const accessProtectedInformation = async () => {
+        const accessSensitiveInformation = async () => {
             const domain = process.env.REACT_APP_AUTH0_DOMAIN;
 
             try {
@@ -15,13 +15,13 @@ const Profile = () => {
                 });
 
                 const sensitiveInformationURL = process.env.REACT_APP_PROTECTED_API;
-                const metadataResponse = await fetch(sensitiveInformationURL, {
+                const sensitiveDataResponse = await fetch(sensitiveInformationURL, {
                     headers: {
                         Authorization: `Bearer ${accessToken}`,
                     },
                 });
 
-                const res = await metadataResponse.json();
+                const res = await sensitiveDataResponse.json();
                 setSensitiveInformation(res.secret)
 
             } catch (e) {
@@ -29,7 +29,7 @@ const Profile = () => {
             }
         };
 
-        accessProtectedInformation();
+        accessSensitiveInformation();
     }, [getAccessTokenSilently, user?.sub]);
 
 
