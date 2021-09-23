@@ -36,7 +36,7 @@ const authzOptions = {
 //Aserto authorizer middleware function
 const checkAuthz = jwtAuthz(authzOptions)
 
-// Create timesheets API endpoint
+//Protected API endpoint
 app.get('/api/protected', checkJwt, checkAuthz, function (req, res) {
     //send the response
     res.json({ secret: "Very sensitive information presented here" });

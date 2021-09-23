@@ -1,6 +1,6 @@
 # Creating a simple node application with the Aserto Authorization SDK
 
-In almost every production level application, there comes the need to allow for a fine grained control over what users can see and do. For the most part, authorization is left as a secondary concern - often bolted on to the application as an afterthought. Then it proves to be difficult and time consuming to hand craft the authorization solution. That’s where Aserto can help.
+In almost every production level application, there comes the need to allow for fine grained control over what users can see and do. For the most part, authorization is left as a secondary concern - often bolted on to the application as an afterthought. Then it proves to be difficult and time consuming to hand craft the authorization solution. That’s where Aserto can help.
 
 Aserto is a could-native authorization platform that allows developers to avoid having to build their own access control solution and instead frees them up to focus on their core user experience. In this tutorial you will learn how to integrate the Aserto SDK in the context of an Express.js API, together with a React application.
 
@@ -12,7 +12,7 @@ _The Control Plane_ manages the lifecycle of policies, user context, and data th
 
 At the core of Aserto’s authorization model is an authorization policy, which we refer to simply as a Policy. Policies are authored in a textual language called Rego, defined as part of the Open Policy Agent (OPA) project in the Cloud Native Computing Foundation. Policies are treated just like application code or infrastructure-as-code - they are stored and versioned in a git repository. We’re going to define and see the policy in action later in this tutorial.
 
-When you’ve completed this tutorial you would have learned how to:
+When you’ve completed this tutorial you'll have learned how to:
 
 1. Create a React application with authentication using Auth0
 2. Set up a simple Express.js application with Auth0 authentication middleware and define a protected route
@@ -73,7 +73,7 @@ You can inspect the settings tab, we'll use some of these details later.
 
 ![](/images/auth0-apis-settings.png)
 
-The last thing we have to set up in Auth0 are test users. We'll set up two users: one that will have access to our sensitive asset, and another that should eventually not be able to acess it.
+Now we have to set up test users in Auth0. We'll set up two users: one that will have access to our sensitive asset, and another that will not be able to access it.
 
 Navigate to the users management section in the lefthand side menu:
 
@@ -103,7 +103,7 @@ From the drop down, select "Auth0 Management API", then select the permissions a
 
 ## React Application setup
 
-We’re going to build a very bare bones application for this tutorial. We’ll start by creating an application using the `create-react-app` generator. We are loosly following the Auth0 instructions for creating a React app that can leverage Auth0 for authentication found [here](https://auth0.com/docs/quickstart/spa/react/01-login).
+We’re going to build a very bare bones application for this tutorial. We’ll start by creating an application using the `create-react-app` generator. We are loosely following the Auth0 instructions for creating a React app that can leverage Auth0 for authentication found [here](https://auth0.com/docs/quickstart/spa/react/01-login).
 
 Let's kick things off and use `npx create-react-app` to initialize our React application. In your terminal, execute the following command:
 
@@ -117,11 +117,11 @@ You can now `cd aserto-react-demo` and start the app by running:
 npm start
 ```
 
-The beloved React logo should appear, indiciating that we the app is ready to go.
+The familiar React logo should appear, indicating that the app is ready to go.
 
 ### Adding Auth0 dependencies
 
-Now that we have a running React application, we'll continue by installing and then importing the required depedency - `@auth0/auth0-react`.
+Now that we have a running React application, we'll continue by installing and then importing the required dependency - `@auth0/auth0-react`.
 
 In your terminal, execute the following command:
 
@@ -160,7 +160,7 @@ REACT_APP_CLIENTID={YOUR_CLIENT_ID}
 REACT_APP_AUDIENCE={YOUR_APP_AUDIENCE}
 ```
 
-> Make sure the `.env` file is add to the `.gitignore` file so that it is not cheked in.
+> Make sure the `.env` file is added to the `.gitignore` file so that it is not checked in.
 
 ### Building React Components
 
@@ -287,7 +287,7 @@ const { jwtAuthz } = require("express-jwt-aserto");
 require("dotenv").config();
 ```
 
-In the next section we'll define the middleware function which will call Auth0 to verify the validy of the JWT (and also enable CORS):
+In the next section we'll define the middleware function which will call Auth0 to verify the validity of the JWT (and also enable CORS):
 
 ```javascript
 //Paste after the dependencies
@@ -316,6 +316,7 @@ app.use(cors());
 Next, we'll create the protected endpoint:
 
 ```javascript
+// Protected API endpoint
 app.get("/api/protected", checkJwt, function (req, res) {
   //send the response
   res.json({ secret: "Very sensitive information presented here" });
@@ -389,7 +390,7 @@ const Profile = () => {
 export default Profile;
 ```
 
-In this portion of the code we use a React effect to first obtain a token from Auth0 (`getAccessTokenSilently`). Then we preform the call to our service sending the authorization token as part of our request's headers (`fetch`). Finally, we parse the JSON response from the server and set the state of the `sensitiveInformation` variable.
+In this portion of the code we use a React effect to first obtain a token from Auth0 (`getAccessTokenSilently`). Then we perform the call to our service sending the authorization token as part of our request's headers (`fetch`). Finally, we parse the JSON response from the server and set the state of the `sensitiveInformation` variable.
 
 ### Test the application
 
@@ -436,7 +437,7 @@ Another dialog will appear, asking us to choose a specific provider:
 
 ![](/images/aserto-add-connection.png)
 
-In this tutorial we are going to use Github, so select it is the provider. After you complete the form, you'll be redirected to Github to allow Aserto to access your Github account. After the process is complete you'll be returned to the Aserto console.
+In this tutorial we are going to use Github, so select it as the provider. After you complete the form, you'll be redirected to Github to allow Aserto to access your Github account. After the process is complete you'll be returned to the Aserto console.
 
 Once connected to Github, select the organization you'd like the new repo for the policy to be generated in. For the "Repo" option select "New (using template)". Complete the form as shown below and click "Create repo".
 
@@ -589,6 +590,6 @@ Success! The sensitive information is presented only to the user we intended.
 
 ## Summary
 
-In this tutorial, we learned how to create a React application that authenticates with Auth0. Then our application performed a query to an Express.js API which is itself protected by Auth0 for authentication and Aserto for authorization. We learned how to create and modify a simple Aserto policy - a first step towards having fine grained control over which users can access which resources. In future tutorials we'll learn how to create more elaborate policies as well as leverging more of the capabilities of the Aserto's SDKs and APIs.
+In this tutorial, we learned how to create a React application that authenticates with Auth0. Then our application performed a query to an Express.js API which is itself protected by Auth0 for authentication and Aserto for authorization. We learned how to create and modify a simple Aserto policy - a first step towards having fine grained control over which users can access which resources. In future tutorials we'll learn how to create more elaborate policies and leverage more of the capabilities of the Aserto's SDKs and APIs.
 
 You can find the completed application and service [here](https://github.com/squanchd/aserto-demo).
