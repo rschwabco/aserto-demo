@@ -17,7 +17,7 @@ When you’ve completed this tutorial you'll have learned how to:
 1. Create a React application with authentication using Auth0
 2. Set up a simple Express.js application with Auth0 authentication middleware and define a protected route
 3. Create and modify a very simple authorization policy
-4. Integrate the Aserto Authorization Express.js SDK to enable fine grained access control.
+4. Integrate the Aserto Authorization Express.js SDK to enable fine grained access control
 
 ## Application Overview
 
@@ -129,13 +129,23 @@ In your terminal, execute the following command:
 npm install @auth0/auth0-react
 ```
 
+To make sure the authentication credentials aren't part of your source code, create a `.env` file in the root of the React project, and copy over the credentials from the Auth0 console (these are the SPA credentials for the Aserto Demo app mentioned above).
+
+```
+REACT_APP_AUTH0_DOMAIN={YOUR_AUTH0_SUBDOMAIN}.us.auth0.com
+REACT_APP_CLIENTID={YOUR_CLIENT_ID}
+REACT_APP_AUDIENCE={YOUR_APP_AUDIENCE}
+```
+
+> Make sure the `.env` file is added to the `.gitignore` file so that it is not checked in.
+
 Then, open the file `index.js` and add the dependency:
 
 ```javascript
 import { Auth0Provider } from "@auth0/auth0-react";
 ```
 
-Next, we'll wrap the top level React Application component with the `Auth0Provider`, and pass it the required properties found in the Auth0 settings page for the single page application you created.
+Next, we'll wrap the top level React Application component with the `Auth0Provider`, and pass it the required configuration values we added to the `.env` file.
 
 ```javascript
 ReactDOM.render(
@@ -151,16 +161,6 @@ ReactDOM.render(
   document.getElementById("root")
 );
 ```
-
-To make sure the authentication credentials aren't part of your source code, create a `.env` file in the root of the React project, and copy over the credentials from the Auth0 console (these are the SPA credentials for the Aserto Demo app mentioned above).
-
-```
-REACT_APP_AUTH0_DOMAIN={YOUR_AUTH0_SUBDOMAIN}.us.auth0.com
-REACT_APP_CLIENTID={YOUR_CLIENT_ID}
-REACT_APP_AUDIENCE={YOUR_APP_AUDIENCE}
-```
-
-> Make sure the `.env` file is added to the `.gitignore` file so that it is not checked in.
 
 ### Building React Components
 
@@ -508,7 +508,6 @@ allowed {
 enabled {
     visible
 }
-
 ```
 
 To make sure our changes take effect, we need to commit our changes and tag a release before we push them back to the repo.
@@ -582,7 +581,7 @@ When we log in with the user we allowed in the policy, we will still be able to 
 
 ![](/images/aserto-test-access-user.png)
 
-But since we defined that only this user has access, when we attempt to login with the second user we created, we should see the message "No access to sensitive data".
+Since we defined that only this user has access, when we attempt to login with the second user we created, we should see the message "No access to sensitive data".
 
 ![](/images/aserto-test-no-access-user.png)
 
