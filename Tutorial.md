@@ -75,7 +75,7 @@ You can inspect the settings tab, we'll use some of these details later.
 
 Now we have to set up test users in Auth0. We'll set up two users: one that will have access to our sensitive asset, and another that will not be able to access it.
 
-Navigate to the users management section in the lefthand side menu:
+Navigate to the users management section in the left hand side menu:
 
 ![Auth0 Menu user](/images/auth0-menu-users.png)
 
@@ -477,7 +477,7 @@ We'll open the file and change the package name to match the path of our Express
 [policy-root].[VERB].[path]
 ```
 
-Where the path is seperated by dots instead of slashes. And so in our case, the express path
+Where the path is separated by dots instead of slashes. And so in our case, the express path
 
 ```javascript
 app.get('/api/protected'...
@@ -489,7 +489,7 @@ becomes
 package asertodemo.GET.api.protected
 ```
 
-We're also going to define the policy such that the only "allowed" user is one with the email "aserto@demo.com". The user seen here will be the same user we recieve from Auth0 (based on their JWT). Aserto attaches this user object to the "input" object. Below is the finished policy:
+We're also going to define the policy such that the only "allowed" user is one with the email "aserto@demo.com". The user seen here will be the same user we receive from Auth0 (based on their JWT). Aserto attaches this user object to the "input" object. Below is the finished policy:
 
 ```
 package asertodemo.GET.api.protected
