@@ -41,63 +41,63 @@ We’re going to need to set up a couple of Auth0 applications and use the crede
 
 Navigate to the Applications tab from the left side menu:
 
-![Create Auth0 App](/images/auth0-menu-applications.png)
+![Auth0 - menu - applications](/images/auth0-menu-applications.png)
 
 And then click on "Create Application":
 
-![Create Auth0 App](/images/auth0-app-create.png)
+![Auth0 - create app](/images/auth0-app-create.png)
 
 Next, we’ll set up a Single Page Application.
 
-![Create Auth0 SPA](/images/auth0-spa-create.png)
+![Auth0 - Create SPA](/images/auth0-spa-create.png)
 
 Once created, we'll navigate to the settings tab of the application and configure the callback URLs, logout URLs and allowed web origins to work with our local applications which will be running on `http://localhost:3000`. Complete the form as shown below:
 
-![Auth0 SPA settings](/images/auth0-spa-settings.png)
+![Auth0 - SPA settings](/images/auth0-spa-settings.png)
 
 When done, scroll to the bottom of the page and hit "Save".
 
 Next, we'll create an API so that our Express.js application can communicate with Auth0 as well.
 
-![](/images/auth0-menu-apis.png)
+![Auth0 - menu - APIs](/images/auth0-menu-apis.png)
 
 Click the "Create API Button":
 
-![](/images/auth0-apis-create.png)
+![Auth0 - Create API](/images/auth0-apis-create.png)
 
 Complete the form as shown below:
 
-![](/images/auth0-apis-create-details.png)
+![Auth0 - Create API details](/images/auth0-apis-create-details.png)
 
 You can inspect the settings tab, we'll use some of these details later.
 
-![](/images/auth0-apis-settings.png)
+![Auth0 - API Settings](/images/auth0-apis-settings.png)
 
 Now we have to set up test users in Auth0. We'll set up two users: one that will have access to our sensitive asset, and another that will not be able to access it.
 
 Navigate to the users management section in the left hand side menu:
 
-![Auth0 Menu user](/images/auth0-menu-users.png)
+![Auth0 - Menu user](/images/auth0-menu-users.png)
 
 Now we'll create the two users mentioned above. Click on the "Create User" button:
 
-![Auth0 user create button](/images/auth0-user-create-button.png)
+![Auth0 - Create user button](/images/auth0-user-create-button.png)
 
 Complete the form as shown below:
 
-![Auth0 user create details](/images/auth0-user-create-details.png)
+![Auth0 - Create user - details](/images/auth0-user-create-details.png)
 
 Then repeat the process for the second user:
 
-![Auth0 user no access create details](/images/auth0-user-no-access-create-details.png)
+![Auth0 - create no access create  details](/images/auth0-user-no-access-create-details.png)
 
 The last thing we have to set up in Auth0 is a Machine to Machine application which will allow Aserto to access Auth0's API. Create a new application and then choose "Machine to Machine Applications":
 
-![](/images/auth0-m2m-aserto-management.png)
+![Auth0 - m2m Aserto management](/images/auth0-m2m-aserto-management.png)
 
 From the drop down, select "Auth0 Management API", then select the permissions as indicated below.
 
-![](/images/auth0-m2m-aserto-management-permissions.png)
+![Auth0 - m2m Aserto management permissions](/images/auth0-m2m-aserto-management-permissions.png)
 
 **That's it!** Auth0 is ready and configured, and we're ready to move on and start building our application.
 
@@ -252,7 +252,7 @@ npm start
 
 Then hit the "Log In" button. If everything works as expected, the profile and email of the signed in user should be displayed.
 
-![](/images/aserto-test-initial.png).
+![Aserto - test initial](/images/aserto-test-initial.png).
 
 Great! Our application authenticates with Auth0, and so we have our user's identity in hand. We now turn to creating the Express.js service which will host our sensitive asset and will communicate with the Aserto hosted authorizer to determine whether or not a logged in user has the permissions to access the said asset based on the user's identity.
 
@@ -411,7 +411,7 @@ In this case we'd expect the sensitive information to not be shown.
 
 We'll remove the rouge characters and test our second user (aserto.no-access@demo.com).
 
-![](/images/aserto-test-user-no-access-has-access.png)
+![Aserto test user no access has access](/images/aserto-test-user-no-access-has-access.png)
 
 Whoops! That's not what we want. But since we didn't add any way to authorize particular users - this "no-access" user still has access to our very sensitive information. Let's fix that by creating an Aserto policy to allow access only to our intended user.
 
@@ -423,33 +423,33 @@ The policy we'll create for this tutorial is very simple. It is going to allow a
 
 We start by creating a new policy in the Aserto console. Once you're logged in, on the Policies tab click the "Add Policy" button.
 
-![](/images/aserto-add-policy-button.png)
+![Aserto - add policy button](/images/aserto-add-policy-button.png)
 
 You'll see the following dialog, prompting you to select a code provider. As mentioned above, Aserto uses source code control to maintain policies, so we first have to provide a source code provider where the policy will be stored and changes to it would be tracked.
 
-![](/images/aserto-add-policy-details-1.png)
+![Aserto - add policy details](/images/aserto-add-policy-details-1.png)
 
 From the drop down select "Add new source code connection"
 
-![](/images/aserto-add-policy-details-add-source.png)
+![Aserto - add policy details - add source](/images/aserto-add-policy-details-add-source.png)
 
 Another dialog will appear, asking us to choose a specific provider:
 
-![](/images/aserto-add-connection.png)
+![Aserto - add connection](/images/aserto-add-connection.png)
 
 In this tutorial we are going to use Github, so select it as the provider. After you complete the form, you'll be redirected to Github to allow Aserto to access your Github account. After the process is complete you'll be returned to the Aserto console.
 
 Once connected to Github, select the organization you'd like the new repo for the policy to be generated in. For the "Repo" option select "New (using template)". Complete the form as shown below and click "Create repo".
 
-![](/images/aserto-add-connection-select-org-and-repo.png)
+![Asertro - add connection - select org and repo](/images/aserto-add-connection-select-org-and-repo.png)
 
 The last thing we have to do to complete the creation of the policy is naming it:
 
-![](/images/aserto-add-policy-name-policy.png)
+![Aserto - add policy - name policy](/images/aserto-add-policy-name-policy.png)
 
 After selecting a name for your policy, click "Add policy" to complete the process. You should see the newly created policy under the Policies tab.
 
-![](/images/aserto-add-policy-policies-list.png)
+![Aserto - add policy - policies list](/images/aserto-add-policy-policies-list.png)
 
 Next, we'll find the policy repo in our Github account, clone it and make some changes.
 
@@ -477,7 +477,7 @@ We'll open the file and change the package name to match the path of our Express
 [policy-root].[VERB].[path]
 ```
 
-Where the path is separated by dots instead of slashes. And so in our case, the express path
+Where the path is separated by dots instead of slashes. And so in our case, the Express.js path
 
 ```javascript
 app.get('/api/protected'...
@@ -525,7 +525,7 @@ We now have a minimal policy that should satisfy the requirements we defined.
 
 In order for Aserto to be able to work with the same users found in Auth0, we need to create a connection to Auth0. To do that, navigate to the "Connections" tab in the Aserto console, and click the "Add Connection" button. Complete the form using the M2M credentials you created before for the Aserto Management application in Auth0.
 
-![](/images/aserto-connections-auth0-details.png)
+![Aserto - Connections - Auth0 details](/images/aserto-connections-auth0-details.png)
 
 Click "Add connection" to complete the process.
 
@@ -535,7 +535,7 @@ We now need to configure and apply the Aserto middleware. In order to avoid savi
 
 To find these credentials, click on your policy in the Policies tab. Then choose the "Policy settings" tab. You should see the following:
 
-![](/images/aserto-policy-settings.png)
+![Aserto - policy settings](/images/aserto-policy-settings.png)
 
 Copy the values to the `.env` file:
 
@@ -579,11 +579,11 @@ app.get("/api/protected", checkJwt, checkAuthz, function (req, res) {
 
 When we log in with the user we allowed in the policy, we will still be able to see the "Very sensitive information presented here".
 
-![](/images/aserto-test-access-user.png)
+![Aserto - test access user](/images/aserto-test-access-user.png)
 
 Since we defined that only this user has access, when we attempt to login with the second user we created, we should see the message "No access to sensitive data".
 
-![](/images/aserto-test-no-access-user.png)
+![Aserto - test no access user](/images/aserto-test-no-access-user.png)
 
 Success! The sensitive information is presented only to the user we intended.
 
