@@ -154,7 +154,6 @@ ReactDOM.render(
     clientId={process.env.REACT_APP_CLIENTID}
     redirectUri={window.location.origin}
     audience={process.env.REACT_APP_AUDIENCE}
-    scope="read:current_user update:current_user_metadata"
   >
     <App />
   </Auth0Provider>,
@@ -351,10 +350,7 @@ const Profile = () => {
             const domain = process.env.REACT_APP_AUTH0_DOMAIN;
 
             try {
-                const accessToken = await getAccessTokenSilently({
-                    audience: `https://${domain}/api/v2/`,
-                    scope: "read:current_user",
-                });
+                const accessToken = await getAccessTokenSilently();
 
                 const sensitiveInformationURL = `http://localhost:8080/api/protected`;
                 const sensitiveDataResponse = await fetch(sensitiveInformationURL, {
@@ -409,7 +405,7 @@ sensitiveInformationURL,
 
 In this case we'd expect the sensitive information to not be shown.
 
-We'll remove the rouge characters and test our second user (aserto.no-access@demo.com).
+We'll remove the rogue characters and test our second user (aserto.no-access@demo.com).
 
 ![Aserto test user no access has access](/images/aserto-test-user-no-access-has-access.png)
 
@@ -498,15 +494,9 @@ package asertodemo.GET.api.protected
 # only grant access when explicitly granted
 
 default allowed = false
-default visible = false
-default enabled = false
 
 allowed {
     input.user.email == "aserto@demo.com"
-}
-
-enabled {
-    visible
 }
 ```
 
@@ -516,7 +506,8 @@ To make sure our changes take effect, we need to commit our changes and tag a re
 git add .
 git commit -m "Policy update"
 git tag -a v0.0.1 -m "Policy update"
-git push origin master
+git push origin main
+git push --tags
 ```
 
 We now have a minimal policy that should satisfy the requirements we defined.
@@ -540,7 +531,7 @@ To find these credentials, click on your policy in the Policies tab. Then choose
 Copy the values to the `.env` file:
 
 ```
-POLICY_ID{Your Policy ID}
+POLICY_ID={Your Policy ID}
 POLICY_ROOT=asertodemo
 AUTHORIZER_API_KEY={Your Authorizer API Key}
 TENANT_ID={Your tenant ID}

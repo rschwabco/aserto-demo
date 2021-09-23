@@ -9,12 +9,9 @@ const Profile = () => {
             const domain = process.env.REACT_APP_AUTH0_DOMAIN;
 
             try {
-                const accessToken = await getAccessTokenSilently({
-                    audience: `https://${domain}/api/v2/`,
-                    scope: "read:current_user",
-                });
+                const accessToken = await getAccessTokenSilently();
 
-                const sensitiveInformationURL = process.env.REACT_APP_PROTECTED_API;
+                const sensitiveInformationURL = `http://localhost:8080/api/protected`;
                 const sensitiveDataResponse = await fetch(sensitiveInformationURL, {
                     headers: {
                         Authorization: `Bearer ${accessToken}`,
