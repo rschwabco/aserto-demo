@@ -59,19 +59,19 @@ When done, scroll to the bottom of the page and hit "Save".
 
 Next, we'll create an API so that our Express.js application can communicate with Auth0 as well.
 
-![PICTURE](/images/auth0-menu-apis.png)
+![](/images/auth0-menu-apis.png)
 
 Click the "Create API Button":
 
-![PICTURE](/images/auth0-apis-create.png)
+![](/images/auth0-apis-create.png)
 
 Complete the form as shown below:
 
-![PICTURE](/images/auth0-apis-create-details.png)
+![](/images/auth0-apis-create-details.png)
 
 You can inspect the settings tab, we'll use some of these details later.
 
-![PICTURE](/images/auth0-apis-settings.png)
+![](/images/auth0-apis-settings.png)
 
 The last thing we have to set up in Auth0 are test users. We'll set up two users: one that will have access to our sensitive asset, and another that should eventually not be able to acess it.
 
@@ -121,7 +121,7 @@ The beloved React logo should appear, indiciating that we the app is ready to go
 
 ### Adding Auth0 dependencies
 
-Now that we have a running React application, we'll continue by installing and then importing the required depedency `@auth0/auth0-react`.
+Now that we have a running React application, we'll continue by installing and then importing the required depedency - `@auth0/auth0-react`.
 
 In your terminal, execute the following command:
 
@@ -131,13 +131,13 @@ npm install @auth0/auth0-react
 
 Then, open the file `index.js` and add the dependency:
 
-```
+```javascript
 import { Auth0Provider } from "@auth0/auth0-react";
 ```
 
 Next, we'll wrap the top level React Application component with the `Auth0Provider`, and pass it the required properties found in the Auth0 settings page for the single page application you created.
 
-```
+```javascript
 ReactDOM.render(
   <Auth0Provider
     domain={process.env.REACT_APP_AUTH0_DOMAIN}
@@ -148,12 +148,11 @@ ReactDOM.render(
   >
     <App />
   </Auth0Provider>,
-  document.getElementById('root')
+  document.getElementById("root")
 );
-
 ```
 
-To make sure the authentication credentials aren't part of your source code, create a `.env` file in the root of the react project, and copy over the credentials from the Auth0 console (these are the SPA credentials for the Aserto Demo app mentioned above).
+To make sure the authentication credentials aren't part of your source code, create a `.env` file in the root of the React project, and copy over the credentials from the Auth0 console (these are the SPA credentials for the Aserto Demo app mentioned above).
 
 ```
 REACT_APP_AUTH0_DOMAIN={YOUR_AUTH0_SUBDOMAIN}.us.auth0.com
@@ -161,20 +160,20 @@ REACT_APP_CLIENTID={YOUR_CLIENT_ID}
 REACT_APP_AUDIENCE={YOUR_APP_AUDIENCE}
 ```
 
-Make sure the `.env` file is add to the `.gitignore` file so that it is not cheked in.
+> Make sure the `.env` file is add to the `.gitignore` file so that it is not cheked in.
 
 ### Building React Components
 
 Now let's move on to building some components that will also make use of the `@auth0/auth0-react` package. We'll start by creating a `components` folder under `src`. Then we'll create a file called `LoginButton.js`.
 
-```
+```javascript
 import React from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 
 const LoginButton = () => {
-    const { loginWithRedirect } = useAuth0();
+  const { loginWithRedirect } = useAuth0();
 
-    return <button onClick={() => loginWithRedirect()}>Log In</button>;
+  return <button onClick={() => loginWithRedirect()}>Log In</button>;
 };
 
 export default LoginButton;
@@ -182,18 +181,18 @@ export default LoginButton;
 
 Similar to the login button, we'll create a `LogoutButton.js` file, in the `components` folder.
 
-```
+```javascript
 import React from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 
 const LogoutButton = () => {
-    const { logout } = useAuth0();
+  const { logout } = useAuth0();
 
-    return (
-        <button onClick={() => logout({ returnTo: window.location.origin })}>
-            Log Out
-        </button>
-    );
+  return (
+    <button onClick={() => logout({ returnTo: window.location.origin })}>
+      Log Out
+    </button>
+  );
 };
 
 export default LogoutButton;
@@ -201,7 +200,7 @@ export default LogoutButton;
 
 Lastly, we'll create a component to present the user's profile once they're logged in.
 
-```
+```javascript
 import React, { useEffect, useState } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 
@@ -210,7 +209,7 @@ const Profile = () => {
     return (
         isAuthenticated && (
             <div>
-                <img src={user.picture} alt={user.name} />
+                <img src={user.} alt={user.name} />
                 <h2>{user.name}</h2>
                 <p>{user.email}</p>
 
@@ -224,11 +223,11 @@ export default Profile;
 
 We can now assemble the pieces in our `App.js` file:
 
-```
-import './App.css';
-import LoginButton from './components/LoginButton'
-import LogoutButton from './components/LogoutButton'
-import Profile from './components/Profile'
+```javascript
+import "./App.css";
+import LoginButton from "./components/LoginButton";
+import LogoutButton from "./components/LogoutButton";
+import Profile from "./components/Profile";
 
 function App() {
   return (
@@ -241,7 +240,6 @@ function App() {
 }
 
 export default App;
-
 ```
 
 ### Test the application
@@ -252,7 +250,7 @@ Let's test our application by logging in. If it's not already running, start you
 npm start
 ```
 
-Then hit the "Log In" button. If everything works as expected, the profile picture and email of the signed in user should be displayed.
+Then hit the "Log In" button. If everything works as expected, the profile and email of the signed in user should be displayed.
 
 ![](/images/aserto-test-initial.png).
 
@@ -279,34 +277,34 @@ AUTH0_ISSUER=https://{YOUR_AUTH0_DOMAIN_HERE}.us.auth0.com/
 
 Create a file called `index.js` - that will be our server. To this file, add the following dependncies:
 
-```
-const express = require('express');
+```javascript
+const express = require("express");
 const app = express();
-const jwt = require('express-jwt');
-const jwksRsa = require('jwks-rsa');
-const cors = require('cors');
-const { jwtAuthz } = require('express-jwt-aserto');
-require('dotenv').config()
+const jwt = require("express-jwt");
+const jwksRsa = require("jwks-rsa");
+const cors = require("cors");
+const { jwtAuthz } = require("express-jwt-aserto");
+require("dotenv").config();
 ```
 
 In the next section we'll define the middleware function which will call Auth0 to verify the validy of the JWT (and also enable CORS):
 
-```
+```javascript
 //Paste after the dependencies
 
 const checkJwt = jwt({
-    // Dynamically provide a signing key based on the kid in the header and the signing keys provided by the JWKS endpoint
-    secret: jwksRsa.expressJwtSecret({
-        cache: true,
-        rateLimit: true,
-        jwksRequestsPerMinute: 5,
-        jwksUri: process.env.AUTH0_JWKS_URI
-    }),
+  // Dynamically provide a signing key based on the kid in the header and the signing keys provided by the JWKS endpoint
+  secret: jwksRsa.expressJwtSecret({
+    cache: true,
+    rateLimit: true,
+    jwksRequestsPerMinute: 5,
+    jwksUri: process.env.AUTH0_JWKS_URI,
+  }),
 
-    // Validate the audience and the issuer
-    audience: process.env.AUTH0_AUDIENCE,
-    issuer: process.env.AUTH0_ISSUER,
-    algorithms: ['RS256']
+  // Validate the audience and the issuer
+  audience: process.env.AUTH0_AUDIENCE,
+  issuer: process.env.AUTH0_ISSUER,
+  algorithms: ["RS256"],
 });
 
 // Enable CORS
@@ -317,12 +315,10 @@ app.use(cors());
 
 Next, we'll create the protected endpoint:
 
-```
-
-// Create timesheets API endpoint
-app.get('/api/protected', checkJwt, function (req, res) {
-    //send the response
-    res.json({ secret: "Very sensitive information presented here" });
+```javascript
+app.get("/api/protected", checkJwt, function (req, res) {
+  //send the response
+  res.json({ secret: "Very sensitive information presented here" });
 });
 
 // Launch the API Server at localhost:8080
@@ -341,7 +337,7 @@ node index.js
 
 To test this endpoint we're going to have to make sure the React app actually sends the authentication token to the server. To do that, we'll have to make some changes to the `Profile.js` file in our React app.
 
-```
+```javascript
 import React, { useEffect, useState } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 
@@ -381,7 +377,7 @@ const Profile = () => {
     return (
         isAuthenticated && (
             <div>
-                <img src={user.picture} alt={user.name} />
+                <img src={user.} alt={user.name} />
                 <h2>{user.name}</h2>
                 <p>{user.email}</p>
                 <p>{sensitiveInformation || 'No access to sensitive information'}</p>
@@ -397,16 +393,17 @@ In this portion of the code we use a React effect to first obtain a token from A
 
 ### Test the application
 
-Let's test our application by logging in again. If everything works as expected, we should see the profile picture for the account we logged in with, as well as the label "Very sensitive information presented here". At the moment, this should work for both users we created in Auth0.
+Let's test our application by logging in again. If everything works as expected, we should see the profile for the account we logged in with, as well as the label "Very sensitive information presented here". At the moment, this should work for both users we created in Auth0.
 
 We can further test this by intentionally sending a malformed header and making sure the sensitive information isn't shown. One way to do this is to append so rouge characters to the access token like so:
 
-```
-(sensitiveInformationURL, {
+```javascript
+sensitiveInformationURL,
+  {
     headers: {
-        Authorization: `Bearer ${accessToken}SOME_ROGUE_CHARECTERS`,
+      Authorization: `Bearer ${accessToken}SOME_ROGUE_CHARECTERS`,
     },
-});
+  };
 ```
 
 In this case we'd expect the sensitive information to not be shown.
@@ -425,33 +422,33 @@ The policy we'll create for this tutorial is very simple. It is going to allow a
 
 We start by creating a new policy in the Aserto console. Once you're logged in, on the Policies tab click the "Add Policy" button.
 
-![PICTURE](/images/aserto-add-policy-button.png)
+![](/images/aserto-add-policy-button.png)
 
 You'll see the following dialog, prompting you to select a code provider. As mentioned above, Aserto uses source code control to maintain policies, so we first have to provide a source code provider where the policy will be stored and changes to it would be tracked.
 
-![PICTURE](/images/aserto-add-policy-details-1.png)
+![](/images/aserto-add-policy-details-1.png)
 
 From the drop down select "Add new source code connection"
 
-![PICTURE](/images/aserto-add-policy-details-add-source.png)
+![](/images/aserto-add-policy-details-add-source.png)
 
 Another dialog will appear, asking us to choose a specific provider:
 
-![PICTURE](/images/aserto-add-connection.png)
+![](/images/aserto-add-connection.png)
 
 In this tutorial we are going to use Github, so select it is the provider. After you complete the form, you'll be redirected to Github to allow Aserto to access your Github account. After the process is complete you'll be returned to the Aserto console.
 
 Once connected to Github, select the organization you'd like the new repo for the policy to be generated in. For the "Repo" option select "New (using template)". Complete the form as shown below and click "Create repo".
 
-![PICTURE](/images/aserto-add-connection-select-org-and-repo.png)
+![](/images/aserto-add-connection-select-org-and-repo.png)
 
 The last thing we have to do to complete the creation of the policy is naming it:
 
-![PICTURE](/images/aserto-add-policy-name-policy.png)
+![](/images/aserto-add-policy-name-policy.png)
 
 After selecting a name for your policy, click "Add policy" to complete the process. You should see the newly created policy under the Policies tab.
 
-![PICTURE](/images/aserto-add-policy-policies-list.png)
+![](/images/aserto-add-policy-policies-list.png)
 
 Next, we'll find the policy repo in our Github account, clone it and make some changes.
 
@@ -481,7 +478,7 @@ We'll open the file and change the package name to match the path of our Express
 
 Where the path is seperated by dots instead of slashes. And so in our case, the express path
 
-```
+```javascript
 app.get('/api/protected'...
 ```
 
@@ -552,30 +549,29 @@ TENANT_ID={Your tenant ID}
 
 Continue by creating the configuration object for the Aserto middleware:
 
-```
+```javascript
 const authzOptions = {
-    authorizerServiceUrl: "https://authorizer.prod.aserto.com",
-    policyId: process.env.POLICY_ID,
-    policyRoot: process.env.POLICY_ROOT,
-    authorizerApiKey: process.env.AUTHORIZER_API_KEY,
-    tenantId: process.env.TENANT_ID
+  authorizerServiceUrl: "https://authorizer.prod.aserto.com",
+  policyId: process.env.POLICY_ID,
+  policyRoot: process.env.POLICY_ROOT,
+  authorizerApiKey: process.env.AUTHORIZER_API_KEY,
+  tenantId: process.env.TENANT_ID,
 };
-
 ```
 
 We'll define a function for the Aserto middleware, and pass it the configuration object.
 
-```
+```javascript
 //Aserto authorizer middleware function
-const checkAuthz = jwtAuthz(authzOptions)
+const checkAuthz = jwtAuthz(authzOptions);
 ```
 
 Lastly, add the `checkAuthz` middleware to our protected path.
 
-```
-app.get('/api/protected', checkJwt, checkAuthz, function (req, res) {
-    //send the response
-    res.json({ secret: "Very sensitive information presented here" });
+```javascript
+app.get("/api/protected", checkJwt, checkAuthz, function (req, res) {
+  //send the response
+  res.json({ secret: "Very sensitive information presented here" });
 });
 ```
 
